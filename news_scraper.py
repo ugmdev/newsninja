@@ -50,4 +50,4 @@ class NewsScraper:
                     results[topic] = f"Error: {str(e)}"
                 await asyncio.sleep(1)  # Avoid overwhelming news sites
 
-        return results
+        return {"news_analysis" : results}

@@ -128,60 +128,63 @@ def summarize_with_ollama(headlines) -> str:
 
 
 def generate_broadcast_news(api_key, news_data, reddit_data, topics):
-    # Set up the system message
+    # Updated system message with flexible source handling
     system_prompt = """
-    You are broadcast_news_writer, a professional virtual news reporter. Your job is to generate natural, clear, TTS-ready news reports based on official news articles and Reddit discussions.
+    You are broadcast_news_writer, a professional virtual news reporter. Generate natural, TTS-ready news reports using available sources:
 
-    Each topic will have:
-    1. A title
-    2. An news article
-    3. A Reddit discussion
+    For each topic, STRUCTURE BASED ON AVAILABLE DATA:
+    1. If news exists: "According to official reports..." + summary
+    2. If Reddit exists: "Online discussions on Reddit reveal..." + summary
+    3. If both exist: Present news first, then Reddit reactions
+    4. If neither exists: Skip the topic (shouldn't happen)
 
-    For each topic:
-    - Begin with the topic title.
-    - Summarize the official article starting with: "According to official reports..."
-    - Then summarize Reddit reactions starting with: "In response, online discussions on Reddit revealed that..."
-    - Quote notable user comments without usernames.
-    - End with: "To wrap up this segment..." followed by a brief neutral summary.
-    - Most importantly, start the news part directly, NO PREAMBLE!
-    - Keep the news concise, if converted to audio, it should not be longer than 2 mins per topic
+    Formatting rules:
+    - ALWAYS start directly with the content, NO INTRODUCTIONS
+    - Keep audio length 60-120 seconds per topic
+    - Use natural speech transitions like "Meanwhile, online discussions..." 
+    - Incorporate 1-2 short quotes from Reddit when available
+    - Maintain neutral tone but highlight key sentiments
+    - End with "To wrap up this segment..." summary
 
-    Write everything in full, clear paragraphs suitable for speech synthesis. Avoid using bullet points, emojis, or formatting.
+    Write in full paragraphs optimized for speech synthesis. Avoid markdown.
     """
 
-    # Prepare the merged input
     try:
         topic_blocks = []
         for topic in topics:
-            news_text = news_data.get(topic, "")
-            reddit_text = reddit_data.get(topic, "")
-            topic_blocks.append(
-                f"Topic: {topic}\n\n"
-                f"Official News Text:\n{news_text}\n\n"
-                f"Reddit Discussion Text:\n{reddit_text}\n"
-            )
+            news_content = news_data["news_analysis"].get(topic ) if news_data else ''
+            reddit_content = reddit_data["reddit_analysis"].get(topic) if reddit_data else ''
+            context = []
+            if news_content:
+                context.append(f"OFFICIAL NEWS CONTENT:\n{news_content}")
+            if reddit_content:
+                context.append(f"REDDIT DISCUSSION CONTENT:\n{reddit_content}")
+            
+            if context:  # Only include topics with actual content
+                topic_blocks.append(
+                    f"TOPIC: {topic}\n\n" +
+                    "\n\n".join(context)
+                )
 
         user_prompt = (
-            "Below are topics with both official news and Reddit discussions. "
-            "Generate a broadcast-ready segment for each:\n\n" +
-            "\n---\n".join(topic_blocks)
+            "Create broadcast segments for these topics using available sources:\n\n" +
+            "\n\n--- NEW TOPIC ---\n\n".join(topic_blocks)
         )
 
-        # Create the LangChain Claude agent
         llm = ChatAnthropic(
-            model="claude-3-opus-20240229",  # Or claude-3-sonnet-20240229
+            model="claude-3-opus-20240229",
             api_key=api_key,
             temperature=0.3,
             max_tokens=4000,
         )
 
-        # Call the model
         response = llm.invoke([
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_prompt)
         ])
 
         return response.content
+
     except Exception as e:
         raise e
 
@@ -237,31 +240,67 @@ def text_to_audio_elevenlabs_sdk(
     Returns:
         str: Path to the saved audio file.
     """
-    api_key = api_key or os.getenv("ELEVEN_API_KEY")
-    if not api_key:
-        raise ValueError("ElevenLabs API key is required.")
+    try:
+        api_key = api_key or os.getenv("ELEVEN_API_KEY")
+        if not api_key:
+            raise ValueError("ElevenLabs API key is required.")
 
-    # Initialize client
-    client = ElevenLabs(api_key=api_key)
+        # Initialize client
+        client = ElevenLabs(api_key=api_key)
 
-    # Get the audio generator
-    audio_stream = client.text_to_speech.convert(
-        text=text,
-        voice_id=voice_id,
-        model_id=model_id,
-        output_format=output_format
-    )
+        # Get the audio generator
+        audio_stream = client.text_to_speech.convert(
+            text=text,
+            voice_id=voice_id,
+            model_id=model_id,
+            output_format=output_format
+        )
 
-    # Ensure output directory exists
-    os.makedirs(output_dir, exist_ok=True)
+        # Ensure output directory exists
+        os.makedirs(output_dir, exist_ok=True)
 
-    # Generate unique filename
-    filename = f"tts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
-    filepath = os.path.join(output_dir, filename)
+        # Generate unique filename
+        filename = f"tts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
+        filepath = os.path.join(output_dir, filename)
 
-    # Write audio chunks to file
-    with open(filepath, "wb") as f:
-        for chunk in audio_stream:
-            f.write(chunk)
+        # Write audio chunks to file
+        with open(filepath, "wb") as f:
+            for chunk in audio_stream:
+                f.write(chunk)
 
-    return filepath
+        return filepath
+
+    except Exception as e:
+        raise e
+
+from pathlib import Path
+from gtts import gTTS
+AUDIO_DIR = Path("audio")
+AUDIO_DIR.mkdir(exist_ok=True)  # Create directory if it doesn't exist
+def tts_to_audio(text: str, language: str = 'en') -> str:
+    """
+    Convert text to speech using gTTS (Google Text-to-Speech) and save to file.
+    
+    Args:
+        text: Input text to convert
+        language: Language code (default: 'en')
+    
+    Returns:
+        str: Path to saved audio file
+    
+    Example:
+        tts_to_audio("Hello world", "en")
+    """
+    try:
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = AUDIO_DIR / f"tts_{timestamp}.mp3"
+        
+        # Create TTS object and save
+        tts = gTTS(text=text, lang=language, slow=False)
+        tts.save(str(filename))
+        
+        return str(filename)
+    except Exception as e:
+        print(f"gTTS Error: {str(e)}")
+        return None

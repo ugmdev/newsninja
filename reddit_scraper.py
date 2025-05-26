@@ -18,9 +18,15 @@ from tenacity import (
 )
 from aiolimiter import AsyncLimiter
 from tenacity import retry, stop_after_attempt, wait_exponential
+from datetime import datetime, timedelta
 
 
 load_dotenv()
+
+
+two_weeks_ago = datetime.today() - timedelta(days=14) 
+two_weeks_ago_str = two_weeks_ago.strftime('%Y-%m-%d')
+
 
 class MCPOverloadedError(Exception):
     pass
@@ -51,8 +57,8 @@ async def process_topic(agent, topic: str):
         messages = [
             {
                 "role": "system",
-                "content": """You are a Reddit analysis expert. Use available tools to:
-                1. Find top 5 posts about the given topic BUT only from the last week!
+                "content": f"""You are a Reddit analysis expert. Use available tools to:
+                1. Find top 2 posts about the given topic BUT only after {two_weeks_ago_str}, NOTHING before this date strictly!
                 2. Analyze their content and sentiment
                 3. Create a summary of discussions and overall sentiment"""
             },

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "01aeebdbfcad66e271d7ca36e341944a9eb400ed0311e28ad29a9988885b21cf"
+            "sha256": "8dc10f50c5c6848fbfcae687fe062dc1fc7c96e8311d0836ff23f642c5a85519"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -198,11 +198,11 @@
         },
         "click": {
             "hashes": [
-                "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202",
-                "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"
+                "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2",
+                "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a"
             ],
-            "markers": "python_version >= '3.10'",
-            "version": "==8.2.1"
+            "markers": "python_version >= '3.7'",
+            "version": "==8.1.8"
         },
         "distro": {
             "hashes": [
@@ -245,6 +245,15 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==3.1.44"
+        },
+        "gtts": {
+            "hashes": [
+                "sha256:5dd579377f9f5546893bc26315ab1f846933dc27a054764b168f141065ca8436",
+                "sha256:f5737b585f6442f677dbe8773424fd50697c75bdf3e36443585e30a8d48c1884"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7'",
+            "version": "==2.5.4"
         },
         "h11": {
             "hashes": [
@@ -693,11 +702,11 @@
         },
         "narwhals": {
             "hashes": [
-                "sha256:17064abffd264ea1cfe6aefc8a0080f3a4ffb3659a98bcad5456ca80b88f2a0a",
-                "sha256:1e6c731811d01c61147c52433b4d4edfb6511aaf2c859aa01c2e8ca6ff4d27e5"
+                "sha256:0ab2e5a1757a19b071e37ca74b53b0b5426789321d68939738337dfddea629b5",
+                "sha256:d958336b40952e4c4b7aeef259a7074851da0800cf902186a58f2faeff97be02"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.40.0"
+            "version": "==1.41.0"
         },
         "numpy": {
             "hashes": [

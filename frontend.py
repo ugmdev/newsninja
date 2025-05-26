@@ -43,7 +43,7 @@ def main():
 
     # Display selected topics
     if st.session_state.topics:
-        st.subheader("✅ Selected Topics")
+        st.subheader("✅ Selected Topic")
         for i, topic in enumerate(st.session_state.topics[:3]):
             cols = st.columns([4, 1])
             cols[0].write(f"{i+1}. {topic}")

@@ -16,6 +16,7 @@ aiolimiter = "*"
 langgraph = "*"
 mcp = "*"
 langchain-mcp-adapters = "*"
+gtts = "*"
 
 [dev-packages]
 
