@@ -39,7 +39,7 @@ model = ChatAnthropic(model="claude-3-5-sonnet-20240620")
 server_params = StdioServerParameters(
     command="npx",
     env={
-        "API_TOKEN": os.getenv("API_TOKEN"),
+        "API_TOKEN": os.getenv("BRIGHTDATA_API_TOKEN"),
         "WEB_UNLOCKER_ZONE": os.getenv("WEB_UNLOCKER_ZONE"),
     },
     args=["@brightdata/mcp"],
